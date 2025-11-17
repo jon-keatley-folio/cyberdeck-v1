@@ -1,0 +1,16 @@
+{
+	"nodes":[
+		{"id":"2ff1360e987cef7f","x":-700,"y":-560,"width":560,"height":180,"type":"text","text":"Screen"},
+		{"id":"f1279474745fc1c3","x":-505,"y":-360,"width":170,"height":50,"type":"text","text":"screen keys"},
+		{"id":"6905049bc6fae713","x":-700,"y":-360,"width":175,"height":50,"type":"text","text":"left speaker"},
+		{"id":"5045d796b572f025","type":"text","text":"right speaker","x":-315,"y":-360,"width":175,"height":50},
+		{"id":"efe2bec5a8bffd1a","type":"text","text":"HDMI out","x":-402,"y":-620,"width":175,"height":50},
+		{"id":"517fc12d755ba4db","type":"text","text":"Power in","x":-540,"y":-620,"width":120,"height":50},
+		{"id":"e6ebec1848096557","x":108,"y":-604,"width":250,"height":60,"type":"text","text":"Top of screen box will include ports"},
+		{"id":"3d4325ec4b139891","x":-292,"y":-200,"width":250,"height":60,"type":"text","text":"push buttons with embossed symbols"}
+	],
+	"edges":[
+		{"id":"11084fba2c53ff69","fromNode":"efe2bec5a8bffd1a","fromSide":"right","toNode":"e6ebec1848096557","toSide":"left"},
+		{"id":"ac09dbef8b4c861d","fromNode":"f1279474745fc1c3","fromSide":"bottom","toNode":"3d4325ec4b139891","toSide":"top"}
+	]
+}
