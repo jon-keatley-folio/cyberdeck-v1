@@ -15,7 +15,10 @@ function pad(x) = x + 2;
 
 //connectors
 //M3x4x5mm
-m3_insert = 4.5;
+m3_insert = half(4.5);
+m3_depth = 5;
+stand_radius = m3_insert * 1.5;
+stand_insert_radius = m3_insert - 0.5;
 
 //screen wider than my print bed!
 screen_width = 26 * 10;
@@ -24,6 +27,8 @@ screen_trim_v = 5.5;
 screen_trim_h = 9.5;
 
 screen_depth = 16;
+screen_glass_depth = 1;
+screen_stands = screen_depth - screen_glass_depth;
 
 sw_mt = screen_width - (screen_trim_h * 2);
 sh_mt = screen_height - (screen_trim_v * 2);
@@ -46,18 +51,40 @@ case_width = pad(max(screen_width,keyboard_width));
 case_height = pad(max(screen_height, keyboard_height));
 
 
-//screen mount points
-
 
 //screen case
 
 module screen_front()
 {
+	//panel
 	difference()
 	{
 		cube([case_width,case_height,4],center=true);
 		cube([sw_mt,sh_mt,5],center=true);
+		
+		translate([0,0,-1.6])
+		cube([screen_width,screen_height,screen_glass_depth],center=true);
 	}
+	
+	//screen mount points
+	screen_points = [
+		[-half(case_width) + 5, -half(case_height) + 5, -half(screen_stands) - 2],
+		[half(case_width) - 5, -half(case_height) + 5, -half(screen_stands) - 2],
+		[-half(case_width) + 5, half(case_height) - 5, -half(screen_stands) - 2],
+		[half(case_width) - 5, half(case_height) - 5, -half(screen_stands) - 2],
+	];
+	
+	for(p = screen_points)
+	{
+		translate(p)
+		difference()
+		{
+			cylinder(h=screen_stands,r=stand_radius,center=true);
+			translate([0,0,-(half(screen_stands) - half(m3_depth))])
+			cylinder(h=m3_depth + 1,r=stand_insert_radius,center=true);
+		}
+	}
+	
 }
 
 module screen_panel()
