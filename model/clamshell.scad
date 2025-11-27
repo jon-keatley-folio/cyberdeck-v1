@@ -41,10 +41,11 @@ sp_pcb_port_depth = 6;
 sp_buttons = 5;
 sp_btn_width = sp_pcb_width / sp_buttons;
 
-
+//panel
+screen_panel_height = double(sp_pcb_height) + 5;
 
 //keyboard
-keyboard_width = 277;
+keyboard_width = 288;
 keyboard_height =  125;
 
 case_width = pad(max(screen_width,keyboard_width));
@@ -67,11 +68,13 @@ module screen_front()
 	}
 	
 	//screen mount points
+	mount_offset_v = 7;
+	mount_offset_h = 8;
 	screen_points = [
-		[-half(case_width) + 5, -half(case_height) + 5, -half(screen_stands) - 2],
-		[half(case_width) - 5, -half(case_height) + 5, -half(screen_stands) - 2],
-		[-half(case_width) + 5, half(case_height) - 5, -half(screen_stands) - 2],
-		[half(case_width) - 5, half(case_height) - 5, -half(screen_stands) - 2],
+		[-half(case_width) + mount_offset_h, -half(case_height) + mount_offset_v, -half(screen_stands) - 2],
+		[half(case_width) - mount_offset_h, -half(case_height) + mount_offset_v, -half(screen_stands) - 2],
+		[-half(case_width) + mount_offset_h, half(case_height) - mount_offset_v, -half(screen_stands) - 2],
+		[half(case_width) - mount_offset_h, half(case_height) - mount_offset_v, -half(screen_stands) - 2],
 	];
 	
 	for(p = screen_points)
@@ -85,6 +88,10 @@ module screen_front()
 		}
 	}
 	
+	//screen panel
+	translate([0,-half(screen_height + screen_panel_height),0])
+	screen_panel();
+	
 }
 
 module screen_panel()
@@ -96,12 +103,26 @@ module screen_panel()
 	sp_pcb_port_depth = 6;
 	sp_buttons = 5;
 	sp_btn_width = sp_pcb_width / sp_buttons;*/
-	cube([sp_pcb_width, sp_pcb_height, 2],center=true);
-	
-	for (x = [0:sp_buttons -1])
+	difference()
 	{
-		translate([(x * sp_btn_width) - half(sp_pcb_width - sp_btn_width),-half(sp_pcb_height),2])
-		cube([sp_btn_width - 1,double(sp_pcb_height),2],center=true);
+		cube([case_width, screen_panel_height, 4],center=true);
+		
+		cube([sp_pcb_width, sp_pcb_height , 5],center=true);
+	}
+
+	translate([0,half(sp_pcb_height) + 0.5,0])
+	difference()
+	{
+		union()
+		{
+			for (x = [0:sp_buttons -1])
+			{
+				translate([(x * sp_btn_width) - half(sp_pcb_width - sp_btn_width),-half(sp_pcb_height),0])
+				cube([sp_btn_width - 0.5,sp_pcb_height,4],center=true);
+			}
+		}
+		translate([0,-0.9,-0.4])
+		cube([sp_pcb_width, 2, 4],center=true);
 	}
 	
 	
@@ -125,8 +146,6 @@ show_back = false;
 if(show_front)
 {
 	screen_front();
-	translate([0,-80,0])
-	screen_panel();
 }
 
 if(show_back)
