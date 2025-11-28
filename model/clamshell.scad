@@ -49,7 +49,10 @@ keyboard_width = 288;
 keyboard_height =  125;
 
 case_width = pad(max(screen_width,keyboard_width));
-case_height = pad(max(screen_height, keyboard_height));
+case_height = pad(screen_height + screen_panel_height);
+
+case_height_without_panel = case_height - screen_panel_height;
+
 
 
 
@@ -60,7 +63,7 @@ module screen_front()
 	//panel
 	difference()
 	{
-		cube([case_width,case_height,4],center=true);
+		cube([case_width,case_height_without_panel,4],center=true);
 		cube([sw_mt,sh_mt,5],center=true);
 		
 		translate([0,0,-1.6])
@@ -68,13 +71,14 @@ module screen_front()
 	}
 	
 	//screen mount points
-	mount_offset_v = 7;
+	mount_offset_t = 7;
+	mount_offset_b = -4;
 	mount_offset_h = 8;
 	screen_points = [
-		[-half(case_width) + mount_offset_h, -half(case_height) + mount_offset_v, -half(screen_stands) - 2],
-		[half(case_width) - mount_offset_h, -half(case_height) + mount_offset_v, -half(screen_stands) - 2],
-		[-half(case_width) + mount_offset_h, half(case_height) - mount_offset_v, -half(screen_stands) - 2],
-		[half(case_width) - mount_offset_h, half(case_height) - mount_offset_v, -half(screen_stands) - 2],
+		[-half(case_width) + mount_offset_h, -half(case_height_without_panel) + mount_offset_b, -half(screen_stands) - 2],
+		[half(case_width) - mount_offset_h, -half(case_height_without_panel) + mount_offset_b, -half(screen_stands) - 2],
+		[-half(case_width) + mount_offset_h, half(case_height_without_panel) - mount_offset_t, -half(screen_stands) - 2],
+		[half(case_width) - mount_offset_h, half(case_height_without_panel) - mount_offset_t, -half(screen_stands) - 2],
 	];
 	
 	for(p = screen_points)
@@ -89,7 +93,7 @@ module screen_front()
 	}
 	
 	//screen panel
-	translate([0,-half(screen_height + screen_panel_height),0])
+	translate([0,-half(case_height_without_panel),0])
 	screen_panel();
 	
 }
@@ -141,7 +145,7 @@ module keyboard_case()
 }
 
 show_front = true;
-show_back = false;
+show_back = true;
 
 if(show_front)
 {
