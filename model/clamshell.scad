@@ -28,6 +28,7 @@ screen_trim_h = 9.5;
 
 screen_depth = 16;
 screen_glass_depth = 1;
+screen_back_depth = 5.6;
 screen_stands = screen_depth - screen_glass_depth;
 
 sw_mt = screen_width - (screen_trim_h * 2);
@@ -49,14 +50,29 @@ keyboard_width = 288;
 keyboard_height =  125;
 
 case_width = pad(max(screen_width,keyboard_width));
-case_height = pad(screen_height + screen_panel_height);
+case_height = pad(screen_height + screen_panel_height + 10);
 
 case_height_without_panel = case_height - screen_panel_height;
 
+//-- helpers -----------------------------------------------------------------------------------
+
+module mount_points(points, height)
+{
+	for(p = points)
+	{
+		translate(p)
+		difference()
+		{
+			cylinder(h=height,r=stand_radius,center=true);
+			translate([0,0,-(half(height) - half(m3_depth))])
+			cylinder(h=m3_depth + 1,r=stand_insert_radius,center=true);
+		}
+	}
+}
 
 
 
-//screen case
+//-- screen front -----------------------------------------------------------------------------
 
 module screen_front()
 {
@@ -64,9 +80,11 @@ module screen_front()
 	difference()
 	{
 		cube([case_width,case_height_without_panel,4],center=true);
+		
+		translate([0,-1,0])
 		cube([sw_mt,sh_mt,5],center=true);
 		
-		translate([0,0,-1.6])
+		translate([0,-1,-1.6])
 		cube([screen_width,screen_height,screen_glass_depth],center=true);
 	}
 	
@@ -75,28 +93,31 @@ module screen_front()
 	mount_offset_b = -4;
 	mount_offset_h = 8;
 	screen_points = [
-		[-half(case_width) + mount_offset_h, -half(case_height_without_panel) + mount_offset_b, -half(screen_stands) - 2],
-		[half(case_width) - mount_offset_h, -half(case_height_without_panel) + mount_offset_b, -half(screen_stands) - 2],
+		[-half(case_width) + mount_offset_h, -half(case_height) + mount_offset_b, -half(screen_stands) - 2],
+		[half(case_width) - mount_offset_h, -half(case_height) + mount_offset_b, -half(screen_stands) - 2],
 		[-half(case_width) + mount_offset_h, half(case_height_without_panel) - mount_offset_t, -half(screen_stands) - 2],
 		[half(case_width) - mount_offset_h, half(case_height_without_panel) - mount_offset_t, -half(screen_stands) - 2],
 	];
+	mount_points(screen_points, screen_stands);
 	
-	for(p = screen_points)
-	{
-		translate(p)
-		difference()
-		{
-			cylinder(h=screen_stands,r=stand_radius,center=true);
-			translate([0,0,-(half(screen_stands) - half(m3_depth))])
-			cylinder(h=m3_depth + 1,r=stand_insert_radius,center=true);
-		}
-	}
+	//screen brace
+	b_bof = 11;
+	t_bof = 8;
+	brace_points = [
+		[-half(sw_mt) ,-half(sh_mt) - b_bof, -half(screen_back_depth) - 2],
+		[half(sw_mt),half(sh_mt) + t_bof, -half(screen_back_depth) - 2],
+		[half(sw_mt) ,-half(sh_mt) - b_bof, -half(screen_back_depth) - 2],
+		[-half(sw_mt),half(sh_mt) + t_bof, -half(screen_back_depth) - 2]
+	];
+	mount_points(brace_points, screen_back_depth);
+	
 	
 	//screen panel
-	translate([0,-half(case_height_without_panel),0])
-	screen_panel();
-	
+	translate([0,-half(case_height_without_panel + screen_panel_height),0])
+	screen_panel();	
 }
+
+//--- screen panel ----------------------------------------------------------------------
 
 module screen_panel()
 {
@@ -128,11 +149,9 @@ module screen_panel()
 		translate([0,-0.9,-0.4])
 		cube([sp_pcb_width, 2, 4],center=true);
 	}
-	
-	
-	
-	
 }
+
+// -- keyboard ------------------------------------------------------------------------
 
 module keyboard_case()
 {
@@ -154,6 +173,6 @@ if(show_front)
 
 if(show_back)
 {
-	translate([0,-half(case_width),0])
+	translate([0,-half(case_width) - 60,0])
 	keyboard_case();
 }
