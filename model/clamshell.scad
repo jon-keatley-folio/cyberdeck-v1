@@ -135,6 +135,28 @@ module screen_front()
 		[-half(sw_mt) + 4,half(sh_mt) + t_bof, -half(screen_back_depth) - 2]
 	];
 	mount_points(brace_points, screen_back_depth);
+    
+    //vertical bars
+    bar_height = case_height - 30;
+    translate([screen_points[0][0] - 3,-10,-half(screen_stands)])
+    cube([10,bar_height,screen_stands],center=true);
+    
+    translate([screen_points[1][0] + 3,-10,-half(screen_stands)])
+    cube([10,bar_height,screen_stands],center=true);
+    
+    //corner sections
+    corner_size = 20;
+    corners = [
+        [-half(case_width-corner_size),-half(case_height-corner_size),-half(screen_stands)],
+        [half(case_width-corner_size),-half(case_height-corner_size),-half(screen_stands)],
+        [-half(case_width-corner_size),half(case_height-corner_size),-half(screen_stands)],
+        [half(case_width-corner_size),half(case_height-corner_size),-half(screen_stands)],
+    ];
+    for(c = corners)
+    {
+        translate(c)
+        cube([corner_size,corner_size,screen_stands],center=true);
+    }
 	
 	
 	//screen panel
