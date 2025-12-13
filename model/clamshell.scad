@@ -146,16 +146,25 @@ module screen_front()
     
     //corner sections
     corner_size = 20;
+    corner_of = 2;
     corners = [
-        [-half(case_width-corner_size),-half(case_height-corner_size),-half(screen_stands)],
-        [half(case_width-corner_size),-half(case_height-corner_size),-half(screen_stands)],
-        [-half(case_width-corner_size),half(case_height-corner_size),-half(screen_stands)],
-        [half(case_width-corner_size),half(case_height-corner_size),-half(screen_stands)],
+        [[-half(case_width-corner_size),half(case_height)-corner_size,-half(screen_stands)],
+        [corner_of,-corner_of]],
+        [[half(case_width-corner_size),half(case_height)-corner_size,-half(screen_stands)],
+        [-corner_of,-corner_of]],
+        [[-half(case_width-corner_size),-half(case_height),-half(screen_stands)],
+        [corner_of,corner_of]],
+        [[half(case_width-corner_size),-half(case_height),-half(screen_stands)],[-corner_of,corner_of]]
     ];
     for(c = corners)
     {
-        translate(c)
-        cube([corner_size,corner_size,screen_stands],center=true);
+        translate(c[0])
+        difference()
+        {
+            cube([corner_size,corner_size,screen_stands],center=true);
+            translate([c[1][0],c[1][1],0])
+            cube([corner_size,corner_size,screen_stands + 1],center=true);
+        }
     }
 	
 	
