@@ -138,23 +138,23 @@ module screen_front()
     
     //vertical bars
     bar_height = case_height - 30;
-    translate([screen_points[0][0] - 3,-10,-half(screen_stands)])
+    translate([screen_points[0][0] - 3,-10,-half(screen_stands) -2])
     cube([10,bar_height,screen_stands],center=true);
     
-    translate([screen_points[1][0] + 3,-10,-half(screen_stands)])
+    translate([screen_points[1][0] + 3,-10,-half(screen_stands)-2])
     cube([10,bar_height,screen_stands],center=true);
     
     //corner sections
     corner_size = 20;
     corner_of = 2;
     corners = [
-        [[-half(case_width-corner_size),half(case_height)-corner_size,-half(screen_stands)],
+        [[-half(case_width-corner_size),half(case_height)-corner_size,-half(screen_stands) - 2],
         [corner_of,-corner_of]],
-        [[half(case_width-corner_size),half(case_height)-corner_size,-half(screen_stands)],
+        [[half(case_width-corner_size),half(case_height)-corner_size,-half(screen_stands) - 2],
         [-corner_of,-corner_of]],
-        [[-half(case_width-corner_size),-half(case_height),-half(screen_stands)],
+        [[-half(case_width-corner_size),-half(case_height),-half(screen_stands) - 2],
         [corner_of,corner_of]],
-        [[half(case_width-corner_size),-half(case_height),-half(screen_stands)],[-corner_of,corner_of]]
+        [[half(case_width-corner_size),-half(case_height),-half(screen_stands) -2],[-corner_of,corner_of]]
     ];
     for(c = corners)
     {
