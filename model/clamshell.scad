@@ -15,7 +15,7 @@ function pad(x) = x + 2;
 function fault(x) = x + 0.4;
 
 //connectors
-//M3x4x5mm
+//M3x4x5mm <-- need to match the smaller side of the insert
 m3_insert = half(4.5);
 m3_depth = 5;
 stand_radius = m3_insert * 1.5;
@@ -146,15 +146,15 @@ module screen_front()
     
     //corner sections
     corner_size = 20;
-    corner_of = 2;
+    panel_size = 2;
     corners = [
         [[-half(case_width-corner_size),half(case_height)-corner_size,-half(screen_stands) - 2],
-        [corner_of,-corner_of]],
+        [panel_size,-panel_size]],
         [[half(case_width-corner_size),half(case_height)-corner_size,-half(screen_stands) - 2],
-        [-corner_of,-corner_of]],
+        [-panel_size,-panel_size]],
         [[-half(case_width-corner_size),-half(case_height),-half(screen_stands) - 2],
-        [corner_of,corner_of]],
-        [[half(case_width-corner_size),-half(case_height),-half(screen_stands) -2],[-corner_of,corner_of]]
+        [panel_size,panel_size]],
+        [[half(case_width-corner_size),-half(case_height),-half(screen_stands) -2],[-panel_size,panel_size]]
     ];
     for(c = corners)
     {
@@ -166,6 +166,15 @@ module screen_front()
             cube([corner_size,corner_size,screen_stands + 1],center=true);
         }
     }
+    
+    //top and bottom panel stands <- turn into an object with holes and renforcements
+    //top
+    translate([0,half(case_height_without_panel - panel_size),-half(screen_stands)])
+    cube([60,panel_size,screen_stands],center=true);
+    
+    //bottom
+    translate([0,-half(case_height + screen_panel_height - panel_size),-half(screen_stands)])
+    cube([100,panel_size,screen_stands],center=true);
 	
 	
 	//screen panel
