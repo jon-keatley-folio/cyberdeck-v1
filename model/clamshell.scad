@@ -14,11 +14,13 @@ function half(x) = x / 2;
 function pad(x) = x + 2;
 function fault(x) = x + 0.4;
 
+$fn=128;
+
 //connectors
 //M3x4x5mm <-- need to match the smaller side of the insert
-m3_insert = half(4.5);
+m3_insert = half(3);
 m3_depth = 5;
-stand_radius = m3_insert * 1.5;
+stand_radius = m3_insert * 2;
 stand_insert_radius = m3_insert - 0.5;
 
 //screen wider than my print bed!
@@ -46,6 +48,10 @@ sp_btn_height = sp_pcb_height * 1.5;
 
 //panel
 screen_panel_height = double(sp_pcb_height) + 5;
+
+//hinge
+hinge_tw = 30;
+hinge_bolt = half(2.5);
 
 //keyboard
 keyboard_width = 288;
@@ -95,6 +101,15 @@ module split(size,offset, splits, section)
 	}
 }
 
+module repeater(points)
+{
+	for(p = points)
+	{
+		translate(p)
+		children(0);
+	}
+}
+
 
 
 //-- screen front -----------------------------------------------------------------------------
@@ -104,6 +119,7 @@ module screen_front()
 	//panel
 	difference()
 	{
+		color("#00FFFF")
 		cube([case_width,case_height_without_panel,4],center=true);
 		
 		translate([0,-1,0])
@@ -176,6 +192,33 @@ module screen_front()
     translate([0,-half(case_height + screen_panel_height - panel_size),-half(screen_stands)])
     cube([100,panel_size,screen_stands],center=true);
 	
+	//hinge brackets
+	hinge_points = [
+	[50,-half(case_height + screen_panel_height - 20),-half(screen_stands)],
+	[50 + hinge_tw,-half(case_height + screen_panel_height - 20),-half(screen_stands)],
+	[-50,-half(case_height + screen_panel_height - 20),-half(screen_stands)],
+	[-50 - hinge_tw,-half(case_height + screen_panel_height - 20),-half(screen_stands)],
+	];
+	
+	repeater(hinge_points)
+	{
+		difference()
+		{
+			cube([panel_size,20,screen_stands],center=true);
+			
+			repeater([
+				[0,6,-4],
+				[0,-5,2],
+				[0,6,2],
+				[0,-5,-4]
+			])
+			{
+				rotate([0,90,0])
+				cylinder(h=panel_size + 1, r=hinge_bolt,center=true);
+			}
+		}
+	}
+	
 	
 	//screen panel
 	translate([0,-half(case_height_without_panel + screen_panel_height),0])
@@ -195,6 +238,7 @@ module screen_panel()
 	sp_btn_width = sp_pcb_width / sp_buttons;*/
 	difference()
 	{
+		color("#00FFFF")
 		cube([case_width, screen_panel_height, 4],center=true);
 		
 		cube([sp_pcb_width + 1, sp_btn_height , 5],center=true);
