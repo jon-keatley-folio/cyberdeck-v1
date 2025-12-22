@@ -13,6 +13,7 @@ function double(x) = x * 2;
 function half(x) = x / 2;
 function pad(x) = x + 2;
 function fault(x) = x + 0.4;
+function amount(x,a) = x * a;
 
 $fn=128;
 
@@ -31,11 +32,21 @@ screen_trim_h = 9.5;
 
 screen_depth = 16;
 screen_glass_depth = 1;
-screen_back_depth = 5.6;
+screen_back_depth = 7;
 screen_stands = screen_depth - screen_glass_depth;
 
 sw_mt = screen_width - (screen_trim_h * 2);
 sh_mt = screen_height - (screen_trim_v * 2);
+
+//screen brace
+b_bof = 11;
+t_bof = 8;
+brace_points = [
+	[half(sw_mt) - 4,half(sh_mt) + t_bof, -half(screen_back_depth) - 2],
+	[half(sw_mt) - 4 ,-half(sh_mt) - b_bof, -half(screen_back_depth) - 2],
+	[-half(sw_mt) + 4 ,-half(sh_mt) - b_bof, -half(screen_back_depth) - 2],
+	[-half(sw_mt) + 4,half(sh_mt) + t_bof, -half(screen_back_depth) - 2]
+];
 
 //screen pad
 sp_pcb_width = 68;
@@ -50,6 +61,7 @@ sp_btn_height = sp_pcb_height * 1.5;
 screen_panel_height = double(sp_pcb_height) + 5;
 
 //hinge
+hinge_offset = 70;
 hinge_tw = 30;
 hinge_bolt = half(2.5);
 
@@ -130,28 +142,21 @@ module screen_front()
 	}
 	
 	//screen mount points
+	side_wall_offset = -half(screen_stands) - 2;
 	mount_offset_t = 7;
 	mount_offset_b = -4;
 	mount_offset_h = 8;
 	screen_points = [
-		[-half(case_width) + mount_offset_h, -half(case_height) + mount_offset_b, -half(screen_stands) - 2],
-		[half(case_width) - mount_offset_h, -half(case_height) + mount_offset_b, -half(screen_stands) - 2],
-		[-half(case_width) + mount_offset_h, half(case_height_without_panel) - mount_offset_t, -half(screen_stands) - 2],
-		[half(case_width) - mount_offset_h, half(case_height_without_panel) - mount_offset_t, -half(screen_stands) - 2],
+		[-half(case_width) + mount_offset_h, -half(case_height) + mount_offset_b, side_wall_offset],
+		[half(case_width) - mount_offset_h, -half(case_height) + mount_offset_b, side_wall_offset],
+		[-half(case_width) + mount_offset_h, half(case_height_without_panel) - mount_offset_t, side_wall_offset],
+		[half(case_width) - mount_offset_h, half(case_height_without_panel) - mount_offset_t, side_wall_offset],
 	];
 	mount_points(screen_points, screen_stands);
 	
 	//screen brace
-	b_bof = 11;
-	t_bof = 8;
-	brace_points = [
-		[-half(sw_mt) + 4 ,-half(sh_mt) - b_bof, -half(screen_back_depth) - 2],
-		[half(sw_mt) - 4,half(sh_mt) + t_bof, -half(screen_back_depth) - 2],
-		[half(sw_mt) - 4 ,-half(sh_mt) - b_bof, -half(screen_back_depth) - 2],
-		[-half(sw_mt) + 4,half(sh_mt) + t_bof, -half(screen_back_depth) - 2]
-	];
 	mount_points(brace_points, screen_back_depth);
-    
+	
     //vertical bars
     bar_height = case_height - 30;
     translate([screen_points[0][0] - 3,-10,-half(screen_stands) -2])
@@ -160,17 +165,18 @@ module screen_front()
     translate([screen_points[1][0] + 3,-10,-half(screen_stands)-2])
     cube([10,bar_height,screen_stands],center=true);
     
+	
     //corner sections
     corner_size = 20;
     panel_size = 2;
     corners = [
-        [[-half(case_width-corner_size),half(case_height)-corner_size,-half(screen_stands) - 2],
+        [[-half(case_width-corner_size),half(case_height)-corner_size,side_wall_offset],
         [panel_size,-panel_size]],
-        [[half(case_width-corner_size),half(case_height)-corner_size,-half(screen_stands) - 2],
+        [[half(case_width-corner_size),half(case_height)-corner_size,side_wall_offset],
         [-panel_size,-panel_size]],
-        [[-half(case_width-corner_size),-half(case_height),-half(screen_stands) - 2],
+        [[-half(case_width-corner_size),-half(case_height),side_wall_offset],
         [panel_size,panel_size]],
-        [[half(case_width-corner_size),-half(case_height),-half(screen_stands) -2],[-panel_size,panel_size]]
+        [[half(case_width-corner_size),-half(case_height),side_wall_offset],[-panel_size,panel_size]]
     ];
     for(c = corners)
     {
@@ -183,21 +189,20 @@ module screen_front()
         }
     }
     
-    //top and bottom panel stands <- turn into an object with holes and renforcements
-    //top
-    translate([0,half(case_height_without_panel - panel_size),-half(screen_stands)])
-    cube([60,panel_size,screen_stands],center=true);
+    //top side panel
+    translate([0,half(case_height_without_panel - panel_size),side_wall_offset])
+    cube([case_width - double(corner_size),panel_size,screen_stands],center=true);
+	
+	//top side panel port hole
     
-    //bottom
-    translate([0,-half(case_height + screen_panel_height - panel_size),-half(screen_stands)])
-    cube([100,panel_size,screen_stands],center=true);
+
 	
 	//hinge brackets
 	hinge_points = [
-	[50,-half(case_height + screen_panel_height - 20),-half(screen_stands)],
-	[50 + hinge_tw,-half(case_height + screen_panel_height - 20),-half(screen_stands)],
-	[-50,-half(case_height + screen_panel_height - 20),-half(screen_stands)],
-	[-50 - hinge_tw,-half(case_height + screen_panel_height - 20),-half(screen_stands)],
+	[hinge_offset,-half(case_height + screen_panel_height - 20),side_wall_offset],
+	[hinge_offset + hinge_tw,-half(case_height + screen_panel_height - 20),side_wall_offset],
+	[-hinge_offset,-half(case_height + screen_panel_height - 20),side_wall_offset],
+	[-hinge_offset - hinge_tw,-half(case_height + screen_panel_height - 20),side_wall_offset],
 	];
 	
 	repeater(hinge_points)
@@ -218,6 +223,22 @@ module screen_front()
 			}
 		}
 	}
+	
+	bsp_width =  half(case_width) - (hinge_offset + hinge_tw + corner_size);
+	bsp_offset = hinge_offset + hinge_tw + half(bsp_width);
+	middle_panel_width = double(hinge_offset);
+	
+	  //bottom center
+    translate([0,-half(case_height + screen_panel_height - panel_size),side_wall_offset])
+    cube([middle_panel_width,panel_size,screen_stands],center=true);
+	
+	//bottom left side panel
+	translate([-bsp_offset,-half(case_height + screen_panel_height - panel_size),side_wall_offset])
+    cube([bsp_width,panel_size,screen_stands],center=true);
+	
+	//bottom right side panel
+	translate([bsp_offset,-half(case_height + screen_panel_height - panel_size),side_wall_offset])
+    cube([bsp_width,panel_size,screen_stands],center=true);
 	
 	
 	//screen panel
@@ -260,6 +281,28 @@ module screen_panel()
 	}
 }
 
+//-- screen braces --------------------------------------------------------------------
+
+module screen_brace(screw_points, offset)
+{
+	padding = 8;
+	hole_gap = max(screw_points[0][1],screw_points[1][1]) - min(screw_points[0][1],screw_points[1][1]);
+	brace_len = hole_gap + padding;
+	
+	translate([screw_points[0][0],-amount(padding,0.20),screw_points[0][2] - half(offset) - 1.2])
+	color("#00FF00")
+	difference()
+	{
+		cube([10,brace_len,4],center=true);
+		
+		for(p = screw_points)
+		{
+			translate([0,p[1] + amount(padding,0.20),0])
+			cylinder(h=5,r=1,center=true);
+		}
+	}
+}
+
 // -- keyboard ------------------------------------------------------------------------
 
 module keyboard_case()
@@ -274,6 +317,7 @@ module keyboard_case()
 
 show_front = true;
 show_back = false;
+show_screen_braces = true;
 
 if(show_front)
 {
@@ -281,6 +325,13 @@ if(show_front)
 	//{
 		screen_front();
 	//}
+}
+
+if(show_screen_braces)
+{
+	//screen brace bars
+	screen_brace([brace_points[0],brace_points[1]],screen_back_depth);
+	screen_brace([brace_points[2],brace_points[3]],screen_back_depth);
 }
 
 if(show_back)
