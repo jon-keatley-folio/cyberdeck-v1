@@ -14,6 +14,7 @@ function half(x) = x / 2;
 function pad(x) = x + 2;
 function fault(x) = x + 0.4;
 function amount(x,a) = x * a;
+function wedge_offset(total_width, section_width, count) = half(total_width) - (section_width * count);
 
 $fn=128;
 
@@ -69,9 +70,9 @@ hinge_bolt = half(2.5);
 keyboard_width = 288;
 keyboard_height =  125;
 
+//case
 case_width = pad(max(screen_width,keyboard_width));
 case_height = pad(screen_height + screen_panel_height + 15);
-
 case_height_without_panel = case_height - screen_panel_height;
 
 case_depth = screen_depth + 4;
@@ -122,7 +123,20 @@ module repeater(points)
 	}
 }
 
-
+module diff_points(points)
+{
+    difference()
+    {
+        children(0);
+        echo("kids ",$children);
+        for(x = [1:$children-1])
+        {
+            translate(points[x - 1])
+            children(x);
+        }
+    }
+    
+}
 
 //-- screen front -----------------------------------------------------------------------------
 
@@ -317,14 +331,34 @@ module keyboard_case()
 
 show_front = true;
 show_back = false;
-show_screen_braces = true;
+show_screen_braces = false;
 
 if(show_front)
 {
-	//split([case_width,case_height + 2,case_depth + 2],[0,-10,-7],3,0)
-	//{
-		screen_front();
-	//}
+    section_index = 2;
+    section_width = case_width / 3;
+    wedge_offset_one = wedge_offset(case_width, section_width, 1);
+    wedge_offset_two = wedge_offset(case_width, section_width, 2);
+    
+    joint_cubes = [
+            [wedge_offset_one,-half(case_height) - amount(6,1.05), -6],
+            [wedge_offset_one,half(case_height) - amount(6,2.35), -6],
+            [wedge_offset_two,-half(case_height) - amount(6,1.05), -6],
+            [wedge_offset_two,half(case_height) - amount(6,2.35), -6]
+    ];
+    
+	split([case_width,case_height + 2,case_depth + 2],[0,-10,-7],3,section_index)
+	{
+        diff_points(joint_cubes)
+        {
+            screen_front();
+
+            cube([10,6,10],center=true);
+            cube([10,6,10],center=true);
+            cube([10,6,10],center=true);
+            cube([10,6,10],center=true);
+        }
+	}
 }
 
 if(show_screen_braces)
