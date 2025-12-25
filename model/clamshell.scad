@@ -14,6 +14,7 @@ function half(x) = x / 2;
 function pad(x) = x + 2;
 function fault(x) = x + 0.4;
 function amount(x,a) = x * a;
+function quarter(x) = x / 4;
 function wedge_offset(total_width, section_width, count) = half(total_width) - (section_width * count);
 
 $fn=128;
@@ -60,6 +61,7 @@ sp_btn_height = sp_pcb_height * 1.5;
 
 //panel
 screen_panel_height = double(sp_pcb_height) + 5;
+panel_hole = half(2.5);
 
 //hinge
 hinge_offset = 70;
@@ -112,6 +114,32 @@ module split(size,offset, splits, section)
 			}
 		}
 	}
+}
+
+module panel(points, hole_size, has_hole=false)
+{
+    hole = has_hole ?
+        [
+        half(points[0]),
+        points[1] + 1,
+        points[2] - amount(points[2],0.3)
+    ] : [0,0,0];
+    
+    hs = has_hole ? hole_size : 0;
+    
+    difference()
+    {
+        cube(points, center=true);
+        cube(hole,   center=true);
+        
+        translate([-quarter(points[0]) - 3,0,0])
+        rotate([90,0,0])
+        cylinder(h=points[1] + 1, r= hs,center=true);
+        
+        translate([quarter(points[0]) + 3,0,0])
+        rotate([90,0,0])
+        cylinder(h=points[1] + 1, r= hs,center=true);
+    } 
 }
 
 module repeater(points)
@@ -203,14 +231,19 @@ module screen_front()
         }
     }
     
-    //top side panel
-    translate([0,half(case_height_without_panel - panel_size),side_wall_offset])
-    cube([case_width - double(corner_size),panel_size,screen_stands],center=true);
-	
-	//top side panel port hole
+    //top side panel - need to split
+    fp_yo = half(case_height_without_panel - panel_size);
+    split_width = (case_width - double(corner_size)) / 3;
     
+    translate([0,fp_yo,side_wall_offset])
+    panel([split_width,panel_size,screen_stands]);
+    
+    for(p = [[-split_width,fp_yo,side_wall_offset], [split_width,fp_yo,side_wall_offset]])
+    {
+        translate(p)
+        panel([split_width,panel_size,screen_stands],panel_hole,true);
+    }
 
-	
 	//hinge brackets
 	hinge_points = [
 	[hinge_offset,-half(case_height + screen_panel_height - 20),side_wall_offset],
@@ -242,17 +275,17 @@ module screen_front()
 	bsp_offset = hinge_offset + hinge_tw + half(bsp_width);
 	middle_panel_width = double(hinge_offset);
 	
-	  //bottom center
+	//bottom center
     translate([0,-half(case_height + screen_panel_height - panel_size),side_wall_offset])
-    cube([middle_panel_width,panel_size,screen_stands],center=true);
+    panel([middle_panel_width,panel_size,screen_stands]);
 	
 	//bottom left side panel
 	translate([-bsp_offset,-half(case_height + screen_panel_height - panel_size),side_wall_offset])
-    cube([bsp_width,panel_size,screen_stands],center=true);
+    panel([bsp_width,panel_size,screen_stands],panel_hole,true);
 	
 	//bottom right side panel
 	translate([bsp_offset,-half(case_height + screen_panel_height - panel_size),side_wall_offset])
-    cube([bsp_width,panel_size,screen_stands],center=true);
+    panel([bsp_width,panel_size,screen_stands],panel_hole,true);
 	
 	
 	//screen panel
