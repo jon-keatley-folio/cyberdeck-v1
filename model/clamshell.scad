@@ -23,8 +23,8 @@ $fn=128;
 //M2.5x4x3.5mm <-- need to match the smaller side of the insert
 m2p5_insert = half(3);
 m2p5_depth = 5;
-stand_radius = m2p5_insert * 2;
-stand_insert_radius = m2p5_insert - 0.5;
+stand_radius = m2p5_insert * 2.2;
+stand_insert_radius = m2p5_insert;
 
 //screen wider than my print bed!
 screen_width = 26 * 10;
@@ -334,8 +334,29 @@ module screen_panel()
 	}
 }
 
-//-- screen braces --------------------------------------------------------------------
+//-- screen wedge ---------------------------------------------------------------------
+// A wedge shape used to attach the different sections 
+module screen_wedge_insert()
+{
+	
+	swi_p = [
+		[0,0],
+		[0,screen_wedge.z],
+		[screen_wedge.y,0],
+		[0,0]
+	];
+	
+	rotate([-90,0,0])
+	linear_extrude(screen_wedge.x,center=true)
+	{
+		polygon(swi_p);
+	}
+	
+	//cube(screen_wedge,center=true);
+}
 
+//-- screen braces --------------------------------------------------------------------
+// creates a long rectangle with screw holes that can been screwed to the front screen panel to hold the screen in place
 module screen_brace(screw_points, offset)
 {
 	padding = 8;
@@ -370,11 +391,11 @@ module keyboard_case()
 
 show_front = true;
 show_back = false;
-show_screen_braces = false;
+show_screen_extras = false;
 
 if(show_front)
 {
-    section_index = 0;
+    section_index = 2;
     section_width = case_width / 3;
     wedge_offset_one = wedge_offset(case_width, section_width, 1);
     wedge_offset_two = wedge_offset(case_width, section_width, 2);
@@ -386,8 +407,8 @@ if(show_front)
             [wedge_offset_two,half(case_height) - amount(6,2.35), -6]
     ];
     
-	split([case_width,case_height + 2,case_depth + 2],[0,-10,-7],3,section_index)
-	{
+	//split([case_width,case_height + 2,case_depth + 2],[0,-10,-7],3,section_index)
+	//{
         diff_points(joint_cubes)
         {
             screen_front();
@@ -397,14 +418,15 @@ if(show_front)
             cube(screen_wedge,center=true);
             cube(screen_wedge,center=true);
         }
-	}
+	//}
 }
 
-if(show_screen_braces)
+if(show_screen_extras)
 {
 	//screen brace bars
-	screen_brace([brace_points[0],brace_points[1]],screen_back_depth);
-	screen_brace([brace_points[2],brace_points[3]],screen_back_depth);
+	//screen_brace([brace_points[0],brace_points[1]],screen_back_depth);
+	//screen_brace([brace_points[2],brace_points[3]],screen_back_depth);
+	screen_wedge_insert();
 }
 
 if(show_back)
