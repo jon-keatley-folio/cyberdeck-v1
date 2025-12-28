@@ -407,8 +407,8 @@ if(show_front)
             [wedge_offset_two,half(case_height) - amount(6,2.35), -6]
     ];
     
-	//split([case_width,case_height + 2,case_depth + 2],[0,-10,-7],3,section_index)
-	//{
+	split([case_width,case_height + 2,case_depth + 2],[0,-10,-7],3,section_index)
+	{
         diff_points(joint_cubes)
         {
             screen_front();
@@ -418,7 +418,7 @@ if(show_front)
             cube(screen_wedge,center=true);
             cube(screen_wedge,center=true);
         }
-	//}
+	}
 }
 
 if(show_screen_extras)
