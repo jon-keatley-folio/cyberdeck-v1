@@ -21,7 +21,7 @@ $fn=128;
 
 //connectors
 //M2.5x4x3.5mm <-- need to match the smaller side of the insert
-m2p5_insert = half(3);
+m2p5_insert = half(3.05);
 m2p5_depth = 5;
 stand_radius = m2p5_insert * 2.2;
 stand_insert_radius = m2p5_insert;
@@ -42,7 +42,7 @@ sh_mt = screen_height - (screen_trim_v * 2);
 
 //screen brace
 b_bof = 11;
-t_bof = 8;
+t_bof = 8.3;
 brace_points = [
 	[half(sw_mt) - 4,half(sh_mt) + t_bof, -half(screen_back_depth) - 2],
 	[half(sw_mt) - 4 ,-half(sh_mt) - b_bof, -half(screen_back_depth) - 2],
@@ -59,6 +59,7 @@ sp_pcb_width = 68;
 sp_pcb_height = 7.5;
 sp_pcb_btn_depth = 6;
 sp_pcb_port_depth = 6;
+sp_pcb = [sp_pcb_width, sp_pcb_height, sp_pcb_btn_depth + 2];
 sp_buttons = 5;
 sp_btn_width = sp_pcb_width / sp_buttons;
 sp_btn_height = sp_pcb_height * 1.5;
@@ -96,6 +97,7 @@ module mount_points(points, height)
 		{
 			cylinder(h=height,r=stand_radius,center=true);
 			translate([0,0,-(half(height) - half(m2p5_depth))])
+            color("#FF00FF")
 			cylinder(h=m2p5_depth + 1,r=stand_insert_radius,center=true);
 		}
 	}
@@ -299,6 +301,13 @@ module screen_front()
 	screen_panel();	
 }
 
+//--- screen panel pcb holder
+module screen_panel_holder()
+{
+    translate([0,-half(case_height_without_panel + screen_panel_height),-8.5])
+    cube(sp_pcb, center=true);
+}
+
 //--- screen panel ----------------------------------------------------------------------
 
 module screen_panel()
@@ -338,16 +347,16 @@ module screen_panel()
 // A wedge shape used to attach the different sections 
 module screen_wedge_insert()
 {
-	
+	shrink = 0.4;
 	swi_p = [
 		[0,0],
-		[0,screen_wedge.z],
-		[screen_wedge.y,0],
+		[0,screen_wedge.z - shrink],
+		[screen_wedge.y - shrink,0],
 		[0,0]
 	];
 	
 	rotate([-90,0,0])
-	linear_extrude(screen_wedge.x,center=true)
+	linear_extrude(screen_wedge.x - shrink,center=true)
 	{
 		polygon(swi_p);
 	}
@@ -359,20 +368,24 @@ module screen_wedge_insert()
 // creates a long rectangle with screw holes that can been screwed to the front screen panel to hold the screen in place
 module screen_brace(screw_points, offset)
 {
-	padding = 8;
+	padding = 7;
 	hole_gap = max(screw_points[0][1],screw_points[1][1]) - min(screw_points[0][1],screw_points[1][1]);
-	brace_len = hole_gap + padding;
+	brace_len = hole_gap + padding - 4;
 	
 	translate([screw_points[0][0],-amount(padding,0.20),screw_points[0][2] - half(offset) - 1.2])
 	color("#00FF00")
 	difference()
 	{
-		cube([10,brace_len,4],center=true);
+        minkowski()
+        {
+		cube([6,brace_len,2],center=true);
+        cylinder(r=2,h=1);
+        }
 		
 		for(p = screw_points)
 		{
 			translate([0,p[1] + amount(padding,0.20),0])
-			cylinder(h=5,r=1,center=true);
+			cylinder(h=5,r=1.5,center=true);
 		}
 	}
 }
@@ -391,7 +404,7 @@ module keyboard_case()
 
 show_front = true;
 show_back = false;
-show_screen_extras = false;
+show_screen_extras = true;
 
 if(show_front)
 {
@@ -407,8 +420,8 @@ if(show_front)
             [wedge_offset_two,half(case_height) - amount(6,2.35), -6]
     ];
     
-	split([case_width,case_height + 2,case_depth + 2],[0,-10,-7],3,section_index)
-	{
+	//split([case_width,case_height + 2,case_depth + 2],[0,-10,-7],3,section_index)
+	//{
         diff_points(joint_cubes)
         {
             screen_front();
@@ -418,15 +431,17 @@ if(show_front)
             cube(screen_wedge,center=true);
             cube(screen_wedge,center=true);
         }
-	}
+	//}
 }
 
 if(show_screen_extras)
 {
 	//screen brace bars
-	//screen_brace([brace_points[0],brace_points[1]],screen_back_depth);
+	screen_brace([brace_points[0],brace_points[1]],screen_back_depth);
 	//screen_brace([brace_points[2],brace_points[3]],screen_back_depth);
 	screen_wedge_insert();
+    
+    screen_panel_holder();
 }
 
 if(show_back)
