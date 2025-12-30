@@ -58,7 +58,9 @@ screen_wedge = [10,6,10];
 sp_pcb_width = 68;
 sp_pcb_height = 7.5;
 sp_pcb_btn_depth = 6;
-sp_pcb_port_depth = 6;
+sp_pcb_port_depth = 7.3;
+sp_pcb_port_width = 10;
+sp_pcb_port_offset = 5;
 sp_pcb = [sp_pcb_width, sp_pcb_height, sp_pcb_btn_depth + 2];
 sp_buttons = 5;
 sp_btn_width = sp_pcb_width / sp_buttons;
@@ -201,6 +203,8 @@ module screen_front()
 		[half(case_width) - mount_offset_h, -half(case_height) + mount_offset_b, side_wall_offset],
 		[-half(case_width) + mount_offset_h, half(case_height_without_panel) - mount_offset_t, side_wall_offset],
 		[half(case_width) - mount_offset_h, half(case_height_without_panel) - mount_offset_t, side_wall_offset],
+		[0, -half(case_height) + mount_offset_b + 17, side_wall_offset],
+		[0, half(case_height_without_panel) - (mount_offset_t - 1.2), side_wall_offset],
 	];
 	mount_points(screen_points, screen_stands);
 	
@@ -301,11 +305,34 @@ module screen_front()
 	screen_panel();	
 }
 
-//--- screen panel pcb holder
+//--- screen panel pcb holder -----------------------------------------------------------
 module screen_panel_holder()
 {
-    translate([0,-half(case_height_without_panel + screen_panel_height),-8.5])
-    cube(sp_pcb, center=true);
+	/*
+		sp_pcb_width = 68;
+		sp_pcb_height = 7.5;
+		sp_pcb_btn_depth = 6;
+		sp_pcb_port_depth = 7.3;
+		sp_pcb_port_width = 10;
+		sp_pcb_port_offset = 5;
+		sp_pcb = [sp_pcb_width, sp_pcb_height, sp_pcb_btn_depth + 2];
+		sp_buttons = 5;
+		sp_btn_width = sp_pcb_width / sp_buttons;
+		sp_btn_height = sp_pcb_height * 1.5;
+	*/
+	
+	pcb_holder = [sp_pcb.x,sp_btn_height + 6,sp_pcb.z + 2];
+	
+    //translate([0,-half(case_height_without_panel + screen_panel_height),-6.5])
+	difference()
+	{
+		cube(pcb_holder, center=true);
+		translate([0,0,1])
+		cube([sp_pcb.x + 1,sp_pcb.y + 5,sp_pcb.z],center=true);
+		
+		translate([half(sp_pcb.x - sp_pcb_port_width) - sp_pcb_port_offset,0, -sp_pcb.z + 4 ])
+		cube([sp_pcb_port_width, 4, 4],center=true);
+	}
 }
 
 //--- screen panel ----------------------------------------------------------------------
@@ -325,6 +352,9 @@ module screen_panel()
 		cube([case_width, screen_panel_height, 4],center=true);
 		
 		cube([sp_pcb_width + 1, sp_btn_height , 5],center=true);
+		
+		translate([0, 0,-6])
+		screen_panel_holder();
 	}
 
 	translate([0,half(sp_btn_height) + 0.5,0])
@@ -439,9 +469,9 @@ if(show_screen_extras)
 	//screen brace bars
 	screen_brace([brace_points[0],brace_points[1]],screen_back_depth);
 	//screen_brace([brace_points[2],brace_points[3]],screen_back_depth);
-	screen_wedge_insert();
+	//screen_wedge_insert();
     
-    screen_panel_holder();
+   screen_panel_holder();
 }
 
 if(show_back)
