@@ -66,14 +66,13 @@ Shopping list
 - [x] Main panel
 - [x] Screen control buttons
 - [x] Back panel mount holes
-- [ ] Add extra screen brace
-- [ ] Add extra back panel mounts
+- [x] Add extra back panel mounts
 - [ ] Screen controls mount
 - [x] Construction method
 - [x] Screen inset 
 - [x] port windows
 - [x] hinge mount
-- [ ] Speaker mounts
+- [ ] Speaker mounts - next to screen control panel?
 - [ ] Screen control icons
 
 ### Screen back panel

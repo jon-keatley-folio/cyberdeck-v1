@@ -21,7 +21,7 @@ $fn=128;
 
 //connectors
 //M2.5x4x3.5mm <-- need to match the smaller side of the insert
-m2p5_insert = half(3.05);
+m2p5_insert = half(3.08);
 m2p5_depth = 5;
 stand_radius = m2p5_insert * 2.2;
 stand_insert_radius = m2p5_insert;
@@ -47,7 +47,7 @@ brace_points = [
 	[half(sw_mt) - 4,half(sh_mt) + t_bof, -half(screen_back_depth) - 2],
 	[half(sw_mt) - 4 ,-half(sh_mt) - b_bof, -half(screen_back_depth) - 2],
 	[-half(sw_mt) + 4 ,-half(sh_mt) - b_bof, -half(screen_back_depth) - 2],
-	[-half(sw_mt) + 4,half(sh_mt) + t_bof, -half(screen_back_depth) - 2]
+	[-half(sw_mt) + 4,half(sh_mt) + t_bof, -half(screen_back_depth) - 2],
 ];
 
 //screen wedge
@@ -59,8 +59,8 @@ sp_pcb_width = 68;
 sp_pcb_height = 7.5;
 sp_pcb_btn_depth = 6;
 sp_pcb_port_depth = 7.3;
-sp_pcb_port_width = 10;
-sp_pcb_port_offset = 5;
+sp_pcb_port_width = 11;
+sp_pcb_port_offset = 4.5;
 sp_pcb = [sp_pcb_width, sp_pcb_height, sp_pcb_btn_depth + 2];
 sp_buttons = 5;
 sp_btn_width = sp_pcb_width / sp_buttons;
@@ -321,15 +321,19 @@ module screen_panel_holder()
 		sp_btn_height = sp_pcb_height * 1.5;
 	*/
 	
-	pcb_holder = [sp_pcb.x,sp_btn_height + 6,sp_pcb.z + 2];
+	pcb_holder = [sp_pcb.x,sp_btn_height + 4,sp_pcb.z + 2];
 	
     //translate([0,-half(case_height_without_panel + screen_panel_height),-6.5])
 	difference()
 	{
 		cube(pcb_holder, center=true);
-		translate([0,0,1])
+		translate([0,0,2])
 		cube([sp_pcb.x + 1,sp_pcb.y + 5,sp_pcb.z],center=true);
 		
+		translate([0,0,1])
+		cube([sp_pcb.x + 1,sp_pcb.y + 1,sp_pcb.z],center=true);
+		
+		//port hole
 		translate([half(sp_pcb.x - sp_pcb_port_width) - sp_pcb_port_offset,0, -sp_pcb.z + 4 ])
 		cube([sp_pcb_port_width, 4, 4],center=true);
 	}
@@ -354,6 +358,7 @@ module screen_panel()
 		cube([sp_pcb_width + 1, sp_btn_height , 5],center=true);
 		
 		translate([0, 0,-6])
+		scale([1.02,1.02,1.02])
 		screen_panel_holder();
 	}
 
@@ -432,13 +437,13 @@ module keyboard_case()
 	}
 }
 
-show_front = true;
+show_front = false;
 show_back = false;
 show_screen_extras = true;
 
 if(show_front)
 {
-    section_index = 2;
+    section_index = 1;
     section_width = case_width / 3;
     wedge_offset_one = wedge_offset(case_width, section_width, 1);
     wedge_offset_two = wedge_offset(case_width, section_width, 2);
@@ -450,8 +455,8 @@ if(show_front)
             [wedge_offset_two,half(case_height) - amount(6,2.35), -6]
     ];
     
-	//split([case_width,case_height + 2,case_depth + 2],[0,-10,-7],3,section_index)
-	//{
+	split([case_width,case_height + 2,case_depth + 2],[0,-10,-7],3,section_index)
+	{
         diff_points(joint_cubes)
         {
             screen_front();
@@ -461,13 +466,13 @@ if(show_front)
             cube(screen_wedge,center=true);
             cube(screen_wedge,center=true);
         }
-	//}
+	}
 }
 
 if(show_screen_extras)
 {
 	//screen brace bars
-	screen_brace([brace_points[0],brace_points[1]],screen_back_depth);
+	//screen_brace([brace_points[0],brace_points[1]],screen_back_depth);
 	//screen_brace([brace_points[2],brace_points[3]],screen_back_depth);
 	//screen_wedge_insert();
     
