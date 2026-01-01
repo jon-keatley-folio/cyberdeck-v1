@@ -24,7 +24,7 @@ $fn=128;
 m2p5_insert = half(3.2);
 m2p5_depth = 5;
 stand_radius = m2p5_insert * 2.2;
-stand_insert_radius = m2p5_insert + 0.1;
+stand_insert_radius = m2p5_insert + 0.2;
 
 //screen wider than my print bed!
 screen_width = 26 * 10;
@@ -55,11 +55,11 @@ brace_points = [
 screen_wedge = [10,6,10];
 
 //screen pad
-sp_pcb_width = 68;
+sp_pcb_width = 69;
 sp_pcb_height = 7.5;
 sp_pcb_btn_depth = 6;
 sp_pcb_port_depth = 7.3;
-sp_pcb_port_width = 15.51;
+sp_pcb_port_width = 16.51;
 sp_pcb_port_offset = -1.001;
 sp_pcb = [sp_pcb_width + 2, sp_pcb_height, sp_pcb_btn_depth + 2];
 sp_buttons = 5;
@@ -431,11 +431,12 @@ module keyboard_case()
 	}
 }
 
-show_front = true;
+show_screen_front = true;
+show_screen_back = true;
 show_back = false;
-show_screen_extras = true;
+show_screen_extras = false;
 
-if(show_front)
+if(show_screen_front)
 {
     section_index = 1;
     section_width = case_width / 3;
@@ -449,8 +450,8 @@ if(show_front)
             [wedge_offset_two,half(case_height) - amount(6,2.35), -6]
     ];
     
-	split([case_width,case_height + 2,case_depth + 2],[0,-10,-7],3,section_index)
-	{
+	//split([case_width,case_height + 2,case_depth + 2],[0,-10,-7],3,section_index)
+	//{
         diff_points(joint_cubes)
         {
             screen_front();
@@ -460,7 +461,15 @@ if(show_front)
             cube(screen_wedge,center=true);
             cube(screen_wedge,center=true);
         }
-	}
+	//}
+}
+
+if(show_screen_back)
+{
+	thickness = 4;
+	
+	translate([0,-half(screen_panel_height),-screen_stands - thickness])
+	cube([case_width,case_height,thickness],center=true);
 }
 
 if(show_screen_extras)

@@ -69,7 +69,7 @@ Shopping list
 - [x] Screen control buttons
 - [x] Back panel mount holes
 - [x] Add extra back panel mounts
-- [ ] Screen controls mount
+- [x] Screen controls mount
 - [x] Construction method
 - [x] Screen inset 
 - [x] port windows
@@ -78,7 +78,7 @@ Shopping list
 - [ ] Screen control icons
 
 ### Screen back panel
-- [ ] Main panel
+- [x] Main panel
 - [ ] Construction method
 - [ ] Front panel mount holes
 - [ ] Screen mount holes
