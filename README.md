@@ -55,11 +55,13 @@ Shopping list
 
 ## Case modelling tasks
 
-- [ ] screen front panel
-- [ ] screen back panel
-- [ ] hinge
-- [ ] keyboard back panel
-- [ ] keyboard front panel
+- [ ] Screen front panel
+- [ ] Screen back panel
+- [ ] Hinge
+- [ ] Keyboard back panel
+- [ ] Keyboard front panel
+- [ ] Wiring
+- [ ] Style
 
 ### Screen front panel
 
@@ -72,7 +74,7 @@ Shopping list
 - [x] Screen inset 
 - [x] port windows
 - [x] hinge mount
-- [ ] Speaker mounts - next to screen control panel?
+- [ ] Speaker mounts - next to screen control panel? -- later
 - [ ] Screen control icons
 
 ### Screen back panel
@@ -82,9 +84,28 @@ Shopping list
 - [ ] Screen mount holes
 - [ ] Computer mount holes
 
+### Hinge
+- [ ] Screen attachment
+- [ ] Keyboard attachment
+- [ ] Linkage
+
 ### Keyboard back panel
 
 - [ ] Main panel
 - [ ] Keyboard inset
+- [ ] Front panel connection
 - [ ] Battery compartments
 - [ ] Hinge mounts
+
+### Keyboard front panel
+- [ ] Back panel connection
+- [ ] Keyboard brace
+
+### Wiring
+
+- [ ] Screen top panel A
+- [ ] Screen top panel B
+- [ ] Screen bottom panel A
+- [ ] Screen bottom panel B
+- [ ] Keyboard panel A
+- [ ] Keyboard panel B

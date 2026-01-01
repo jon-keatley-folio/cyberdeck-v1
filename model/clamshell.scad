@@ -21,10 +21,10 @@ $fn=128;
 
 //connectors
 //M2.5x4x3.5mm <-- need to match the smaller side of the insert
-m2p5_insert = half(3.08);
+m2p5_insert = half(3.2);
 m2p5_depth = 5;
 stand_radius = m2p5_insert * 2.2;
-stand_insert_radius = m2p5_insert;
+stand_insert_radius = m2p5_insert + 0.1;
 
 //screen wider than my print bed!
 screen_width = 26 * 10;
@@ -59,9 +59,9 @@ sp_pcb_width = 68;
 sp_pcb_height = 7.5;
 sp_pcb_btn_depth = 6;
 sp_pcb_port_depth = 7.3;
-sp_pcb_port_width = 11;
-sp_pcb_port_offset = 4.5;
-sp_pcb = [sp_pcb_width, sp_pcb_height, sp_pcb_btn_depth + 2];
+sp_pcb_port_width = 15.51;
+sp_pcb_port_offset = -1.001;
+sp_pcb = [sp_pcb_width + 2, sp_pcb_height, sp_pcb_btn_depth + 2];
 sp_buttons = 5;
 sp_btn_width = sp_pcb_width / sp_buttons;
 sp_btn_height = sp_pcb_height * 1.5;
@@ -306,36 +306,23 @@ module screen_front()
 }
 
 //--- screen panel pcb holder -----------------------------------------------------------
-module screen_panel_holder()
+module screen_panel_holder(mod=0)
 {
-	/*
-		sp_pcb_width = 68;
-		sp_pcb_height = 7.5;
-		sp_pcb_btn_depth = 6;
-		sp_pcb_port_depth = 7.3;
-		sp_pcb_port_width = 10;
-		sp_pcb_port_offset = 5;
-		sp_pcb = [sp_pcb_width, sp_pcb_height, sp_pcb_btn_depth + 2];
-		sp_buttons = 5;
-		sp_btn_width = sp_pcb_width / sp_buttons;
-		sp_btn_height = sp_pcb_height * 1.5;
-	*/
-	
-	pcb_holder = [sp_pcb.x,sp_btn_height + 4,sp_pcb.z + 2];
+	pcb_holder = [sp_pcb.x + half(mod) + 2,(sp_btn_height  + 4) + half(mod),screen_stands + 2 ];
 	
     //translate([0,-half(case_height_without_panel + screen_panel_height),-6.5])
 	difference()
 	{
 		cube(pcb_holder, center=true);
-		translate([0,0,2])
-		cube([sp_pcb.x + 1,sp_pcb.y + 5,sp_pcb.z],center=true);
+		translate([0,0,half(screen_stands - sp_pcb.z) + 1.001])
+		cube([pcb_holder.x + mod + 1,(sp_pcb.y + 5) - half(mod),sp_pcb.z],center=true);
 		
-		translate([0,0,1])
-		cube([sp_pcb.x + 1,sp_pcb.y + 1,sp_pcb.z],center=true);
+		translate([0,0,half(screen_stands - sp_pcb.z) ])
+		cube([sp_pcb.x + mod - 2,sp_pcb.y + 1,sp_pcb.z],center=true);
 		
 		//port hole
 		translate([half(sp_pcb.x - sp_pcb_port_width) - sp_pcb_port_offset,0, -sp_pcb.z + 4 ])
-		cube([sp_pcb_port_width, 4, 4],center=true);
+		cube([sp_pcb_port_width, 4, screen_stands + 4],center=true);
 	}
 }
 
@@ -344,37 +331,44 @@ module screen_panel_holder()
 module screen_panel()
 {
 	//screen pad
-/*	sp_pcb_width = 68;
-	sp_pcb_height = 7.5;
-	sp_pcb_btn_depth = 6;
-	sp_pcb_port_depth = 6;
-	sp_buttons = 5;
-	sp_btn_width = sp_pcb_width / sp_buttons;*/
-	difference()
-	{
-		color("#00FFFF")
-		cube([case_width, screen_panel_height, 4],center=true);
-		
-		cube([sp_pcb_width + 1, sp_btn_height , 5],center=true);
-		
-		translate([0, 0,-6])
-		scale([1.02,1.02,1.02])
-		screen_panel_holder();
-	}
-
-	translate([0,half(sp_btn_height) + 0.5,0])
+	show_holder=false;
+	
 	difference()
 	{
 		union()
 		{
-			for (x = [0:sp_buttons -1])
+			difference()
 			{
-				translate([(x * sp_btn_width) - half(sp_pcb_width - sp_btn_width),-half(sp_btn_height),0])
-				cube([sp_btn_width - 0.5,sp_btn_height,4],center=true);
+				color("#00FFFF")
+				cube([case_width, screen_panel_height, 4],center=true);
+				
+				cube([sp_pcb_width + 1, sp_btn_height , 5],center=true);
+				
+			}
+			
+			translate([0,half(sp_btn_height) + 0.5,0])
+			difference()
+			{
+				union()
+				{
+					for (x = [0:sp_buttons -1])
+					{
+						translate([(x * sp_btn_width) - half(sp_pcb_width - sp_btn_width),-half(sp_btn_height),0])
+						cube([sp_btn_width - 0.8,sp_btn_height - 1,4],center=true);
+					}
+				}
+				translate([0,-0.9,-0.4])
+				cube([sp_pcb_width , 2, 4],center=true);
 			}
 		}
-		translate([0,-0.9,-0.4])
-		cube([sp_pcb_width , 2, 4],center=true);
+		translate([0, 0,-half(screen_panel_height) + 1.5])
+		screen_panel_holder(1.6);
+	}
+	
+	if(show_holder)
+	{
+		translate([0, 0,-half(screen_panel_height) + 1.5 ])
+		screen_panel_holder();
 	}
 }
 
@@ -437,7 +431,7 @@ module keyboard_case()
 	}
 }
 
-show_front = false;
+show_front = true;
 show_back = false;
 show_screen_extras = true;
 
@@ -476,7 +470,9 @@ if(show_screen_extras)
 	//screen_brace([brace_points[2],brace_points[3]],screen_back_depth);
 	//screen_wedge_insert();
     
-   screen_panel_holder();
+	translate([0,0,-half(screen_stands) + 1])
+	rotate([180,0,0])
+	screen_panel_holder();
 }
 
 if(show_back)
