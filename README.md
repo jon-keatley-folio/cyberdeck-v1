@@ -80,7 +80,7 @@ Shopping list
 ### Screen back panel
 - [x] Main panel
 - [ ] Construction method
-- [ ] Front panel mount holes
+- [x] Front panel mount holes
 - [ ] Screen mount holes
 - [ ] Computer mount holes
 
