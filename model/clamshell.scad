@@ -9,469 +9,19 @@ this allows maximum access / cooling etc
 
 */
 
-function double(x) = x * 2;
-function half(x) = x / 2;
-function pad(x) = x + 2;
-function fault(x) = x + 0.4;
-function amount(x,a) = x * a;
-function quarter(x) = x / 4;
-function wedge_offset(total_width, section_width, count) = half(total_width) - (section_width * count);
-function sum(a,b) = [a.x + b.x, a.y + b.y, a.z + b.z];
+include <utils.scad>
+include <variables.scad>
+include <screen_front.scad>
+include <screen_back.scad>
+include <keyboard_back.scad>
 
-$fn=128;
-
-//connectors
-//M2.5x4x3.5mm <-- need to match the smaller side of the insert
-m2p5_insert = half(3.2);
-m2p5_depth = 5;
-m2p6_screw = half(2.4);
-stand_radius = m2p5_insert * 2.2;
-stand_insert_radius = m2p5_insert + 0.2;
-
-//screen wider than my print bed!
-screen_width = 26 * 10;
-screen_height = 12 * 10;
-screen_trim_v = 5.5;
-screen_trim_h = 9.5;
-
-screen_depth = 16;
-screen_glass_depth = 1;
-screen_back_depth = 7;
-screen_stands = screen_depth - screen_glass_depth;
-
-sw_mt = screen_width - (screen_trim_h * 2);
-sh_mt = screen_height - (screen_trim_v * 2);
-
-//screen brace
-b_bof = 11;
-t_bof = 8.3;
-brace_points = [
-	[half(sw_mt) - 4,half(sh_mt) + t_bof, -half(screen_back_depth) - 2],
-	[half(sw_mt) - 4 ,-half(sh_mt) - b_bof, -half(screen_back_depth) - 2],
-	[-half(sw_mt) + 4 ,-half(sh_mt) - b_bof, -half(screen_back_depth) - 2],
-	[-half(sw_mt) + 4,half(sh_mt) + t_bof, -half(screen_back_depth) - 2],
-];
-
-//screen wedge
-
-screen_wedge = [10,6,10];
-
-//screen pad
-sp_pcb_width = 69;
-sp_pcb_height = 7.5;
-sp_pcb_btn_depth = 6;
-sp_pcb_port_depth = 7.3;
-sp_pcb_port_width = 16.51;
-sp_pcb_port_offset = -1.001;
-sp_pcb = [sp_pcb_width + 2, sp_pcb_height, sp_pcb_btn_depth + 2];
-sp_buttons = 5;
-sp_btn_width = sp_pcb_width / sp_buttons;
-sp_btn_height = sp_pcb_height * 1.5;
-
-//panel
-screen_panel_height = double(sp_pcb_height) + 5;
-panel_hole = half(2.5);
-
-//hinge
-hinge_offset = 70;
-hinge_tw = 30;
-hinge_bolt = half(2.5);
-
-//keyboard
-keyboard_width = 288;
-keyboard_height =  125;
-
-//case
-case_width = pad(max(screen_width,keyboard_width));
-case_height = pad(screen_height + screen_panel_height + 15);
-case_height_without_panel = case_height - screen_panel_height;
-
-case_depth = screen_depth + 4;
-
-//screen mount points
-side_wall_offset = -half(screen_stands) - 2;
-mount_offset_t = 7;
-mount_offset_b = -4;
-mount_offset_h = 8;
-screen_points = [
-	[-half(case_width) + mount_offset_h, -half(case_height) + mount_offset_b, side_wall_offset],
-	[half(case_width) - mount_offset_h, -half(case_height) + mount_offset_b, side_wall_offset],
-	[-half(case_width) + mount_offset_h, half(case_height_without_panel) - mount_offset_t, side_wall_offset],
-	[half(case_width) - mount_offset_h, half(case_height_without_panel) - mount_offset_t, side_wall_offset],
-	[0, -half(case_height) + mount_offset_b + 17, side_wall_offset],
-	[0, half(case_height_without_panel) - (mount_offset_t - 1.2), side_wall_offset],
-];
-
-
-
-//-- helpers -----------------------------------------------------------------------------------
-
-module mount_points(points, height)
-{
-	for(p = points)
-	{
-		translate(p)
-		difference()
-		{
-			cylinder(h=height,r=stand_radius,center=true);
-			translate([0,0,-(half(height) - half(m2p5_depth))])
-            color("#FF00FF")
-			cylinder(h=m2p5_depth + 1,r=stand_insert_radius,center=true);
-		}
-	}
-}
-
-module split(size,offset, splits, section)
-{
-	section_width = size[0] / splits;
-	
-	o = half(size[0] - section_width) + offset[0];
-	
-	difference()
-	{
-		children(0);
-		
-		for(i = [0:splits -1])
-		{
-			if(i != section)
-			{
-				translate([o - (i * section_width),offset[1],offset[2]])
-				cube([section_width,size[1],size[2]],center=true);
-			}
-		}
-	}
-}
-
-module panel(points, hole_size, has_hole=false)
-{
-    hole = has_hole ?
-        [
-        half(points[0]),
-        points[1] + 1,
-        points[2] - amount(points[2],0.3)
-    ] : [0,0,0];
-    
-    hs = has_hole ? hole_size : 0;
-    
-    difference()
-    {
-        cube(points, center=true);
-        cube(hole,   center=true);
-        
-        translate([-quarter(points[0]) - 3,0,0])
-        rotate([90,0,0])
-        cylinder(h=points[1] + 1, r= hs,center=true);
-        
-        translate([quarter(points[0]) + 3,0,0])
-        rotate([90,0,0])
-        cylinder(h=points[1] + 1, r= hs,center=true);
-    } 
-}
-
-module repeater(points)
-{
-	for(p = points)
-	{
-		translate(p)
-		children(0);
-	}
-}
-
-module diff_points(points)
-{
-    difference()
-    {
-        children(0);
-        for(x = [0:len(points) -1])
-        {
-			let (index =  x + 1 < $children ? x + 1 : $children - 1)
-			{
-				translate(points[x])
-				children(index);
-			}
-        }
-    }  
-}
-
-//-- screen front -----------------------------------------------------------------------------
-
-module screen_front()
-{
-	//panel
-	difference()
-	{
-		color("#00FFFF")
-		cube([case_width,case_height_without_panel,4],center=true);
-		
-		translate([0,-1,0])
-		cube([sw_mt,sh_mt,5],center=true);
-		
-		translate([0,-1,-1.6])
-		cube([fault(screen_width),fault(screen_height),screen_glass_depth],center=true);
-	}
-	
-
-	mount_points(screen_points, screen_stands);
-	
-	//screen brace
-	mount_points(brace_points, screen_back_depth);
-	
-    //vertical bars
-    bar_height = case_height - 30;
-    translate([screen_points[0][0] - 3,-10,-half(screen_stands) -2])
-    cube([10,bar_height,screen_stands],center=true);
-    
-    translate([screen_points[1][0] + 3,-10,-half(screen_stands)-2])
-    cube([10,bar_height,screen_stands],center=true);
-    
-	
-    //corner sections
-    corner_size = 20;
-    panel_size = 2;
-    corners = [
-        [[-half(case_width-corner_size),half(case_height)-corner_size,side_wall_offset],
-        [panel_size,-panel_size]],
-        [[half(case_width-corner_size),half(case_height)-corner_size,side_wall_offset],
-        [-panel_size,-panel_size]],
-        [[-half(case_width-corner_size),-half(case_height),side_wall_offset],
-        [panel_size,panel_size]],
-        [[half(case_width-corner_size),-half(case_height),side_wall_offset],[-panel_size,panel_size]]
-    ];
-    for(c = corners)
-    {
-        translate(c[0])
-        difference()
-        {
-            cube([corner_size,corner_size,screen_stands],center=true);
-            translate([c[1][0],c[1][1],0])
-            cube([corner_size,corner_size,screen_stands + 1],center=true);
-        }
-    }
-    
-    //top side panel - need to split
-    fp_yo = half(case_height_without_panel - panel_size);
-    split_width = (case_width - double(corner_size)) / 3;
-    
-    translate([0,fp_yo,side_wall_offset])
-    panel([split_width,panel_size,screen_stands]);
-    
-    for(p = [[-split_width,fp_yo,side_wall_offset], [split_width,fp_yo,side_wall_offset]])
-    {
-        translate(p)
-        panel([split_width,panel_size,screen_stands],panel_hole,true);
-    }
-
-	//hinge brackets
-	hinge_points = [
-	[hinge_offset,-half(case_height + screen_panel_height - 20),side_wall_offset],
-	[hinge_offset + hinge_tw,-half(case_height + screen_panel_height - 20),side_wall_offset],
-	[-hinge_offset,-half(case_height + screen_panel_height - 20),side_wall_offset],
-	[-hinge_offset - hinge_tw,-half(case_height + screen_panel_height - 20),side_wall_offset],
-	];
-	
-	repeater(hinge_points)
-	{
-		difference()
-		{
-			cube([panel_size,20,screen_stands],center=true);
-			
-			repeater([
-				[0,6,-4],
-				[0,-5,2],
-				[0,6,2],
-				[0,-5,-4]
-			])
-			{
-				rotate([0,90,0])
-				cylinder(h=panel_size + 1, r=hinge_bolt,center=true);
-			}
-		}
-	}
-	
-	bsp_width =  half(case_width) - (hinge_offset + hinge_tw + corner_size);
-	bsp_offset = hinge_offset + hinge_tw + half(bsp_width);
-	middle_panel_width = double(hinge_offset);
-	
-	//bottom center
-    translate([0,-half(case_height + screen_panel_height - panel_size),side_wall_offset])
-    panel([middle_panel_width,panel_size,screen_stands]);
-	
-	//bottom left side panel
-	translate([-bsp_offset,-half(case_height + screen_panel_height - panel_size),side_wall_offset])
-    panel([bsp_width,panel_size,screen_stands],panel_hole,true);
-	
-	//bottom right side panel
-	translate([bsp_offset,-half(case_height + screen_panel_height - panel_size),side_wall_offset])
-    panel([bsp_width,panel_size,screen_stands],panel_hole,true);
-	
-	
-	//screen panel
-	translate([0,-half(case_height_without_panel + screen_panel_height),0])
-	screen_panel();	
-}
-
-//--- screen panel pcb holder -----------------------------------------------------------
-module screen_panel_holder(mod=0)
-{
-	pcb_holder = [sp_pcb.x + half(mod) + 2,(sp_btn_height  + 4) + half(mod),screen_stands + 2 ];
-	
-    //translate([0,-half(case_height_without_panel + screen_panel_height),-6.5])
-	difference()
-	{
-		cube(pcb_holder, center=true);
-		translate([0,0,half(screen_stands - sp_pcb.z) + 1.001])
-		cube([pcb_holder.x + mod + 1,(sp_pcb.y + 5) - half(mod),sp_pcb.z],center=true);
-		
-		translate([0,0,half(screen_stands - sp_pcb.z) ])
-		cube([sp_pcb.x + mod - 2,sp_pcb.y + 1,sp_pcb.z],center=true);
-		
-		//port hole
-		translate([half(sp_pcb.x - sp_pcb_port_width) - sp_pcb_port_offset,0, -sp_pcb.z + 4 ])
-		cube([sp_pcb_port_width, 4, screen_stands + 4],center=true);
-	}
-}
-
-//--- screen panel ----------------------------------------------------------------------
-
-module screen_panel()
-{
-	//screen pad
-	show_holder=false;
-	
-	difference()
-	{
-		union()
-		{
-			difference()
-			{
-				color("#00FFFF")
-				cube([case_width, screen_panel_height, 4],center=true);
-				
-				cube([sp_pcb_width + 1, sp_btn_height , 5],center=true);
-				
-			}
-			
-			translate([0,half(sp_btn_height) + 0.5,0])
-			difference()
-			{
-				union()
-				{
-					for (x = [0:sp_buttons -1])
-					{
-						translate([(x * sp_btn_width) - half(sp_pcb_width - sp_btn_width),-half(sp_btn_height),0])
-						cube([sp_btn_width - 0.8,sp_btn_height - 1,4],center=true);
-					}
-				}
-				translate([0,-0.9,-0.4])
-				cube([sp_pcb_width , 2, 4],center=true);
-			}
-		}
-		translate([0, 0,-half(screen_panel_height) + 1.5])
-		screen_panel_holder(1.6);
-	}
-	
-	if(show_holder)
-	{
-		translate([0, 0,-half(screen_panel_height) + 1.5 ])
-		screen_panel_holder();
-	}
-}
-
-//-- screen wedge ---------------------------------------------------------------------
-// A wedge shape used to attach the different sections 
-module screen_wedge_insert()
-{
-	shrink = 0.4;
-	swi_p = [
-		[0,0],
-		[0,screen_wedge.z - shrink],
-		[screen_wedge.y - shrink,0],
-		[0,0]
-	];
-	
-	rotate([-90,0,0])
-	linear_extrude(screen_wedge.x - shrink,center=true)
-	{
-		polygon(swi_p);
-	}
-	
-	//cube(screen_wedge,center=true);
-}
-
-//-- screen braces --------------------------------------------------------------------
-// creates a long rectangle with screw holes that can been screwed to the front screen panel to hold the screen in place
-module screen_brace(screw_points, offset)
-{
-	padding = 7;
-	hole_gap = max(screw_points[0][1],screw_points[1][1]) - min(screw_points[0][1],screw_points[1][1]);
-	brace_len = hole_gap + padding - 4;
-	
-	translate([screw_points[0][0],-amount(padding,0.20),screw_points[0][2] - half(offset) - 1.2])
-	color("#00FF00")
-	difference()
-	{
-        minkowski()
-        {
-		cube([6,brace_len,2],center=true);
-        cylinder(r=2,h=1);
-        }
-		
-		for(p = screw_points)
-		{
-			translate([0,p[1] + amount(padding,0.20),0])
-			cylinder(h=5,r=m2p6_screw,center=true);
-		}
-	}
-}
-
-// -- Screen back panel ---------------------------------------------------------------
-module screen_back()
-{
-	
-	thickness = 4;
-	
-	o = [0,10,7];
-	offset_screen = [
-		sum(screen_points[0],o),
-		sum(screen_points[1],o),
-		sum(screen_points[2],o),
-		sum(screen_points[3],o),
-		sum(screen_points[4],o),
-		sum(screen_points[5],o)
-	];
-	
-	translate([0,-half(screen_panel_height),-screen_stands - thickness])
-	diff_points(offset_screen)
-	{
-		cube([case_width,case_height,thickness],center=true);
-		
-		union()
-		{
-			cylinder(h=half(thickness) , r=m2p5_insert);
-			cylinder(h=thickness + 2, r=m2p6_screw);
-		}
-	
-	}
-}
-
-// -- keyboard ------------------------------------------------------------------------
-
-module keyboard_case()
-{
-	difference()
-	{
-		cube([case_width,case_height,5],center=true);
-		translate([0,0,2])
-		cube([keyboard_width,keyboard_height,2],center=true);
-	}
-}
 
 // -- display elements ---------------------------------------------------------------
 
-show_screen_front = true;
+show_screen_front = false;
 show_screen_back = true;
-show_back = false;
-show_screen_extras = true;
+show_keyboard_back = true;
+show_screen_extras = false;
 
 if(show_screen_front)
 {
@@ -486,19 +36,45 @@ if(show_screen_front)
             [wedge_offset_two,-half(case_height) - amount(6,1.05), -6],
             [wedge_offset_two,half(case_height) - amount(6,2.35), -6]
     ];
+	
+	joint_rods = [
+	        [wedge_offset_one,-half(case_height) - amount(6,1.05), 0.5],
+			[wedge_offset_one,-half(case_height) + 18, 0.5],
+            [wedge_offset_one,half(case_height) - amount(6,2.35), 0.5],
+			[wedge_offset_one,half(case_height) - 22, 0.5],
+            [wedge_offset_two,-half(case_height) - amount(6,1.05), 0.5],
+			[wedge_offset_two,-half(case_height) + 18, 0.5],
+            [wedge_offset_two,half(case_height) - amount(6,2.35), 0.5],
+			[wedge_offset_two,half(case_height) - 22, 0.5]
+	];
     
-	//split([case_width,case_height + 2,case_depth + 2],[0,-10,-7],3,section_index)
-	//{
-        diff_points(joint_cubes)
-        {
-            screen_front();
-            cube(screen_wedge,center=true);
-        }
-	//}
+	difference()
+	{
+		union()
+		{
+			//split([case_width,case_height + 2,case_depth + 2],[0,-10,-7],3,section_index)
+			//{
+				diff_points(joint_cubes)
+				{
+					screen_front();
+					cube(screen_wedge,center=true);
+				}
+			//}
+		}
+	
+		repeater(joint_rods)
+		{
+			rotate([0,90,0])
+			cylinder(h=rod_width,r=rod_radius,center=true);
+		}
+	
+	}
+	
 }
 
 if(show_screen_back)
 {
+	translate([0,-half(screen_panel_height),-screen_stands - screen_back_panel_thickness])
 	screen_back();
 }
 
@@ -514,9 +90,9 @@ if(show_screen_extras)
 	screen_panel_holder();*/
 }
 
-if(show_back)
+if(show_keyboard_back)
 {
-	translate([0,-half(case_width) - 60,0])
-	keyboard_case();
+	translate([0,-half(case_width) - 60,-screen_stands - screen_back_panel_thickness])
+	keyboard_case_back();
 }
 
