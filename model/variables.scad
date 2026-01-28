@@ -88,5 +88,31 @@ screen_points = [
 	[0, half(case_height_without_panel) - (mount_offset_t - 1.2), side_wall_offset],
 ];
 
+//screen screw holes
+screen_back_panel_offset = [0,10,7];
+smx = half(100);
+smy = half(50);
+screen_holes = [
+	sum([-smx,-smy,side_wall_offset],screen_back_panel_offset),
+	sum([smx,smy,side_wall_offset],screen_back_panel_offset),
+	sum([-smx,smy,side_wall_offset],screen_back_panel_offset),
+	sum([smx,-smy,side_wall_offset],screen_back_panel_offset)
+];
+
 //screen back panel thickness
 screen_back_panel_thickness = 4;
+
+//pc mounting
+pc_mount_x = 140;
+pc_mount_y = 80;
+pc_mount_z = 8;
+pmx = half(pc_mount_x) - 6;
+pmy = half(pc_mount_y) - 6;
+pc_mount_holes = [
+	sum([-pmx,-pmy,side_wall_offset],screen_back_panel_offset),
+	sum([pmx,pmy,side_wall_offset],screen_back_panel_offset),
+	sum([-pmx,pmy,side_wall_offset],screen_back_panel_offset),
+	sum([pmx,-pmy,side_wall_offset],screen_back_panel_offset)
+];
+
+

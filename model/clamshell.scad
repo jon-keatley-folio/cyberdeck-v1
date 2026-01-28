@@ -18,7 +18,7 @@ include <keyboard_back.scad>
 
 // -- display elements ---------------------------------------------------------------
 
-show_screen_front = false;
+show_screen_front = true;
 show_screen_back = true;
 show_keyboard_back = true;
 show_screen_extras = false;
@@ -70,12 +70,15 @@ if(show_screen_front)
 	
 	}
 	
+	
+	
 }
 
 if(show_screen_back)
 {
 	translate([0,-half(screen_panel_height),-screen_stands - screen_back_panel_thickness])
 	screen_back();
+	
 }
 
 if(show_screen_extras)
